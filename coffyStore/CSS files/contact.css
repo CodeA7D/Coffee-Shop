@@ -1,0 +1,356 @@
+/* Contact Page Specific Styles */
+
+:root {
+    --dark-color: #252525;
+    --orange-color: #db7c00;
+    --purble-color: #3b141c;
+    --light-bg: #f9f5f0;
+}
+
+/* Contact Hero Section */
+.contact-hero {
+    background-color: var(--purble-color);
+    padding: 100px 20px;
+    text-align: center;
+    color: white;
+}
+
+.contact-hero h1 {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    font-family: 'Miniver', cursive;
+    color: var(--orange-color);
+}
+
+.contact-hero p {
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+    color: #f0f0f0;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Contact Information Section */
+.contact-info-section {
+    padding: 80px 0;
+    background-color: white;
+}
+
+.contact-info-card {
+    background: var(--light-bg);
+    padding: 60px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.contact-info-card h2 {
+    color: var(--purble-color);
+    font-size: 2.5rem;
+    margin-bottom: 50px;
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.contact-info-card h2::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background-color: var(--orange-color);
+    border-radius: 2px;
+}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    margin-bottom: 60px;
+}
+
+.info-item {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.info-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.info-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--orange-color), #ff9800);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.info-icon i {
+    color: white;
+    font-size: 1.8rem;
+}
+
+.info-content h3 {
+    color: var(--purble-color);
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+}
+
+.info-content p {
+    color: #666;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* Social Contact */
+.social-contact {
+    padding-top: 40px;
+    border-top: 2px solid #ddd;
+}
+
+.social-contact h3 {
+    color: var(--purble-color);
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+}
+
+.social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background-color: var(--purble-color);
+    color: white;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.social-link:hover {
+    background-color: var(--orange-color);
+    transform: translateY(-5px) scale(1.1);
+}
+
+/* Contact Callout */
+.contact-callout {
+    padding: 80px 0;
+    background-color: var(--purble-color);
+    color: white;
+    text-align: center;
+}
+
+.callout-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.callout-content i {
+    font-size: 4rem;
+    color: var(--orange-color);
+    margin-bottom: 30px;
+    display: block;
+}
+
+.callout-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.callout-content p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    opacity: 0.9;
+}
+
+.callout-actions {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.call-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 40px;
+    background-color: var(--orange-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.call-btn:hover {
+    background-color: transparent;
+    border-color: white;
+    color: white;
+    transform: translateY(-3px);
+}
+
+.call-btn.email-btn {
+    background-color: transparent;
+    border: 2px solid white;
+}
+
+.call-btn.email-btn:hover {
+    background-color: white;
+    color: var(--purble-color);
+}
+
+/* Footer */
+footer {
+    background-color: var(--dark-color);
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+footer .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.social-links {
+    display: flex;
+    gap: 20px;
+}
+
+.social-links a {
+    color: white;
+    font-size: 1.5rem;
+    transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+    color: var(--orange-color);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    footer .container {
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .contact-hero {
+        padding: 60px 20px;
+    }
+    
+    .contact-hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .contact-hero p {
+        font-size: 1rem;
+    }
+    
+    .contact-info-section {
+        padding: 40px 0;
+    }
+    
+    .contact-info-card {
+        padding: 40px 25px;
+    }
+    
+    .contact-info-card h2 {
+        font-size: 2rem;
+    }
+    
+    .contact-callout {
+        padding: 40px 0;
+    }
+    
+    .callout-content h2 {
+        font-size: 2rem;
+    }
+    
+    .call-btn {
+        padding: 15px 30px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-info-card {
+        padding: 30px 20px;
+    }
+    
+    .info-item {
+        padding: 25px;
+    }
+    
+    .info-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .info-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .social-icons {
+        gap: 15px;
+    }
+    
+    .social-link {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+    }
+    
+    .callout-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .call-btn {
+        justify-content: center;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+}

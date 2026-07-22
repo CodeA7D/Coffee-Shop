@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Render all elements Normally -->
+    <link rel="stylesheet" href="./CSS files/normalize.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="./CSS files/all.min.css">
+    <!-- Framework -->
+    <link rel="stylesheet" href="./CSS files/framework.css">
+    <!-- Main CSS file -->   
+    <link rel="stylesheet" href="./CSS files/about.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Miniver&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <title>Coffee Shop</title>
+</head>
+<body>
+
+        <!-- Navigation -->
+<button class="menu-btn" onclick="openNav()">☰</button>
+
+<!-- Side Menu -->
+<nav class="side-menu" id="menu">
+    <a href="./index.html">Home</a>
+    <a href="./about.html">About</a>
+    <a href="./menu page.html">Menu</a>
+    <a href="./contacts.html">Contact</a>
+</nav>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay" onclick="closeNav()"></div>
+
+
+<div class="page-layout">
+
+    <!-- ABOUT -->
+    <section class="about">
+        <div class="content">
+            <div class="details">
+                <h2>ِAbout Us</h2>
+                <p>
+                “Coffee is more than just a drink—it’s an experience.
+                high-quality coffee crafted from the finest beans sourced from around the world.
+                Our passion for coffee goes beyond taste—it’s about creating moments, comfort, and connection in every sip.”
+                </p>
+
+                <div class="social">
+                    <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="testimonials">
+
+        <h2 class="main-title">Testimonials</h2>
+
+        <div class="container">
+
+            <div class="box">
+                <img src="./Image/avatar-02.png" alt="">
+                <h3>Ahmed Mosa</h3>
+                <span class="title">Front End Developer</span>
+                <div class="rate">
+                    <i class="filled fas fa-star"></i>
+                    <i class="filled fas fa-star"></i>
+                    <i class="filled fas fa-star"></i>
+                    <i class="filled fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                </div>
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+            </div>
+
+            <div class="box">
+                <img src="./Image/avatar-03.png" alt="">
+                <h3>Joe Salah</h3>
+                <span class="title">Back End Developer</span>
+                <div class="rate">
+                    <i class="filled fas fa-star"></i>
+                    <i class="filled fas fa-star"></i>
+                    <i class="filled fas fa-star"></i>
+                    <i class="filled fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                </div>
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+            </div>
+
+            <div class="box">
+                <img src="./Image/avatar-04.png" alt="">
+                <h3>Tom Manweel</h3>
+                <span class="title">Full Stack Developer</span>
+                <div class="rate">
+                    <i class="filled fas fa-star"></i>
+                    <i class="filled fas fa-star"></i>
+                    <i class="filled fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                    <i class="far fa-star"></i>
+                </div>
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+            </div>
+
+        </div>
+    </section>
+</div>
+
+<script>
+    function openNav() {
+        document.getElementById("menu").classList.add("active");
+        document.getElementById("overlay").classList.add("active");
+    }
+
+    function closeNav() {
+        document.getElementById("menu").classList.remove("active");
+        document.getElementById("overlay").classList.remove("active");
+    }
+</script>
+
+</body>
+</html>

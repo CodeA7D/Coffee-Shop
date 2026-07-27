@@ -1,0 +1,76 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}
+Favorites | Coffy Store
+{% endblock %}
+
+{% block content %}
+<main>
+    <section class="favorites-banner">
+        <div class="container">
+            <h1>My Favorite Products</h1>
+            <p>Save your favorite drinks and snacks for quick access anytime.</p>
+        </div>
+    </section>
+
+    <section class="favorites-page">
+        <div class="container">
+            <div class="products-grid">
+                <article class="product-card">
+                    <button class="favorite"><i class="fa-solid fa-heart"></i></button>
+                    <img src="{% static 'Image/demi-deherrera-L-sm1B4L1Ns-unsplash.jpg' %}" alt="Caramel Latte">
+                    <h3>Caramel Latte</h3>
+                    <p>Fresh espresso with creamy caramel.</p>
+                    <div class="product-rating">
+                        <i class="fa-solid fa-star"></i>
+                        <span>4.8</span>
+                    </div>
+                    <div class="product-bottom">
+                        <h4>$6.50</h4>
+                    </div>
+                </article>
+
+                <article class="product-card">
+                    <button class="favorite"><i class="fa-solid fa-heart"></i></button>
+                    <img src="{% static 'Image/guy-basabose-FzdEbrA3Qj0-unsplash.jpg' %}" alt="Cappuccino">
+                    <h3>Cappuccino</h3>
+                    <p>Smooth milk foam with rich espresso.</p>
+                    <div class="product-rating">
+                        <i class="fa-solid fa-star"></i>
+                        <span>4.9</span>
+                    </div>
+                    <div class="product-bottom">
+                        <h4>$5.80</h4>
+                    </div>
+                </article>
+
+                <article class="product-card">
+                    <button class="favorite"><i class="fa-solid fa-heart"></i></button>
+                    <img src="{% static 'Image/david-holifield-kPxsqUGneXQ-unsplash.jpg' %}" alt="Cappuccino">
+                    <h3>Chocolate Cake</h3>
+                    <p>Chocolate Lava Cake.</p>
+                    <div class="product-rating">
+                        <i class="fa-solid fa-star"></i>
+                        <span>4.7</span>
+                    </div>
+                    <div class="product-bottom">
+                        <h4>$6.80</h4>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="empty-favorites">
+        <div class="container">
+            <div class="empty-box">
+                <i class="fa-regular fa-heart"></i>
+                <h2>No Favorites Yet</h2>
+                <p>You haven't added any products to your favorites. Browse the menu and start saving your favorite coffee.</p>
+                <a href="{% url 'menu' %}" class="btn-primary">Browse Menu</a>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}
+Menu | Coffy Store
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'menu site/css/menu-style.css' %}">
+
+<main class="menu-page">
+    <section class="menu-banner">
+        <div class="container">
+            <h1>Our Menu</h1>
+        </div>
+    </section>
+
+    <section class="menu-tools">
+        <div class="container">
+            <div class="tools-wrapper">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input id="menu-search" type="text" placeholder="Search your favorite treat...">
+                    <div id="search-suggestions" class="search-suggestions"></div>
+                </div>
+                <select id="category-filter">
+                    <option value="All Categories">All Categories</option>
+                    <option value="Hot Coffee">Hot Coffee</option>
+                    <option value="Cold Drinks">Cold Drinks</option>
+                    <option value="Snacks">Snacks</option>
+                    <option value="Desserts">Desserts</option>
+                    <option value="Hot Drinks">Hot Drinks</option>
+                </select>
+                <select id="sort-filter">
+                    <option value="">Sort By</option>
+                    <option value="price">Price</option>
+                    <option value="rating">Rating</option>
+                    <option value="favorites">Favorites</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <section class="menu-products">
+        <div class="container">
+            <div id="items-list" class="items-list">
+                {% include 'store/components/menu_items.html' %}
+            </div>
+
+            {% include 'store/components/pagination.html' %}
+        </div>
+    </section>
+</main>
+
+<script>
+    const searchInput = document.getElementById('menu-search');
+    const categoryFilter = document.getElementById('category-filter');
+    const sortFilter = document.getElementById('sort-filter');
+    const suggestionsBox = document.getElementById('search-suggestions');
+    const itemsList = document.getElementById('items-list');
+    const pagination = document.getElementById('menu-pagination');
+    const menuUrl = '{% url "menu" %}';
+    const suggestionsUrl = '{% url "search_suggestions" %}';
+
+    function buildUrl(page = null) {
+        const query = searchInput.value.trim();
+        const category = categoryFilter.value;
+        const sort = sortFilter.value;
+        const params = new URLSearchParams({ ajax: '1' });
+
+        if (query) params.set('q', query);
+        if (category && category !== 'All Categories') params.set('category', category);
+        if (sort) params.set('sort', sort);
+        if (page) params.set('page', page);
+        return `${menuUrl}?${params.toString()}`;
+    }
+
+    function updatePaginationState(currentPage) {
+        if (!pagination) return;
+
+        pagination.querySelectorAll('.pagination-link').forEach(button => {
+            const buttonPage = Number(button.dataset.page);
+            button.classList.toggle('active', !Number.isNaN(buttonPage) && buttonPage === currentPage);
+        });
+    }
+
+    async function refreshMenu(page = null) {
+        const response = await fetch(buildUrl(page), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const data = await response.json();
+        if (data.success) {
+            itemsList.innerHTML = data.items_html;
+            if (pagination) {
+                pagination.innerHTML = data.pagination_html || pagination.innerHTML;
+                pagination.dataset.page = data.page || 1;
+                updatePaginationState(Number(data.page || 1));
+                attachPaginationHandlers();
+            }
+        }
+    }
+
+    async function refreshSuggestions() {
+        const query = searchInput.value.trim();
+        if (!query) {
+            suggestionsBox.innerHTML = '';
+            return;
+        }
+
+        const response = await fetch(`${suggestionsUrl}?q=${encodeURIComponent(query)}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const data = await response.json();
+        if (!data.success) {
+            return;
+        }
+
+        suggestionsBox.innerHTML = data.suggestions.map(item => `<button type="button" class="suggestion-item" data-title="${item.title}">${item.title} · ${item.category}</button>`).join('');
+
+        suggestionsBox.querySelectorAll('.suggestion-item').forEach(button => {
+            button.addEventListener('click', () => {
+                searchInput.value = button.dataset.title;
+                suggestionsBox.innerHTML = '';
+                refreshMenu();
+            });
+        });
+    }
+
+    let debounceTimer;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            refreshSuggestions();
+            refreshMenu();
+        }, 200);
+    });
+
+    categoryFilter.addEventListener('change', () => refreshMenu());
+    sortFilter.addEventListener('change', () => refreshMenu());
+
+    function attachPaginationHandlers() {
+        pagination?.querySelectorAll('.pagination-link').forEach(button => {
+            button.addEventListener('click', () => {
+                const page = button.dataset.page;
+                if (page) {
+                    refreshMenu(page);
+                }
+            });
+        });
+    }
+
+    attachPaginationHandlers();
+</script>
+{% endblock %}

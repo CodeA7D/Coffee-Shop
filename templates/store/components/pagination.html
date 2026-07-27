@@ -1,0 +1,17 @@
+<div class="menu-pagination" id="menu-pagination">
+    {% if page > 1 %}
+        <button type="button" class="btn-outline pagination-link" data-page="{{ page|add:'-1' }}">Previous</button>
+    {% else %}
+        <span class="btn-outline disabled">Previous</span>
+    {% endif %}
+
+    {% for page_number in page_numbers %}
+        <button type="button" class="page {% if page_number == page %}active{% endif %} pagination-link" data-page="{{ page_number }}">{{ page_number }}</button>
+    {% endfor %}
+
+    {% if page < total_pages %}
+        <button type="button" class="btn-primary pagination-link" data-page="{{ page|add:'1' }}">Next</button>
+    {% else %}
+        <span class="btn-primary disabled">Next</span>
+    {% endif %}
+</div>

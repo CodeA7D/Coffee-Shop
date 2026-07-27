@@ -1,0 +1,27 @@
+{% for item in menu_items %}
+<article class="menu-item">
+    <div class="item-left">
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.description }}</p>
+        <div class="item-meta">
+            <span class="rating">
+                <i class="fa-solid fa-star"></i>
+                {{ item.rating }}
+            </span>
+            <span class="reviews">{{ item.reviews }} reviews</span>
+            <span class="category">{{ item.category }}</span>
+        </div>
+    </div>
+    <div class="item-right">
+        <div class="price-section">
+            <strong>${{ item.price }}</strong>
+            <span class="discount">{{ item.discount }}</span>
+        </div>
+    </div>
+</article>
+{% empty %}
+<article class="menu-item empty-state">
+    <h3>No matching items found.</h3>
+    <p>Try another search or category.</p>
+</article>
+{% endfor %}

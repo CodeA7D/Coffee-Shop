@@ -1,54 +1,57 @@
 <header>
-    <div class="container">
-        <nav>
-            <a href="{% url 'home' %}" class="logo">
-                <i class="fa-solid fa-mug-hot"></i>
-                Coffee
-            </a>
+  <div class="container">
+    <nav>
+      <a href="{% url 'home' %}" class="logo">
+        <i class="fa-solid fa-mug-hot"></i>
+        Coffee
+      </a>
 
-            <ul class="nav-links">
-                <li>
-                    <a class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
-                        Home
-                    </a>
-                </li>
-                <li>
-                    <a class="{% if request.resolver_match.url_name == 'menu' %}active{% endif %}" href="{% url 'menu' %}">
-                        Menu
-                    </a>
-                </li>
-                <li>
-                    <a class="{% if request.resolver_match.url_name == 'favorites' %}active{% endif %}" href="{% url 'favorites' %}">
-                        Favorites
-                    </a>
-                </li>
-                <li>
-                    <a class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'profile' %}">
-                        Profile
-                    </a>
-                </li>
-                <li>
-                    <a class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">
-                        About
-                    </a>
-                </li>
-                <li>
-                    <a class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'contact' %}">
-                        Contact
-                    </a>
-                </li>
-            </ul>
+      <ul class="nav-links">
+        <li>
+          <a class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+            Home
+          </a>
+        </li>
+        <li>
+          <a class="{% if request.resolver_match.url_name == 'menu' %}active{% endif %}" href="{% url 'menu' %}">
+            Menu
+          </a>
+        </li>
+        <li>
+          <a class="{% if request.resolver_match.url_name == 'favorites' %}active{% endif %}"
+            href="{% url 'favorites' %}">
+            Favorites
+          </a>
+        </li>
+        <li>
+          <a class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'profile' %}">
+            Profile
+          </a>
+        </li>
+        <li>
+          <a class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">
+            About
+          </a>
+        </li>
+        <li>
+          <a class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'contact' %}">
+            Contact
+          </a>
+        </li>
+      </ul>
 
-            <div class="nav-icons">
-                <button class="icon-btn">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
-                <a href="{% url 'favorites' %}">
-                    <button class="icon-btn">
-                        <i class="fa-regular fa-heart"></i>
-                    </button>
-                </a>
-            </div>
-        </nav>
-    </div>
+      <div class="nav-icons">
+        <a href="{% url 'login' %}" class="nav-auth-link">Login</a>
+        <a href="{% url 'signup' %}" class="nav-auth-link nav-auth-link--primary">Sign Up</a>
+        <button class="icon-btn">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+        <a href="{% url 'favorites' %}">
+          <button class="icon-btn">
+            <i class="fa-regular fa-heart"></i>
+          </button>
+        </a>
+      </div>
+    </nav>
+  </div>
 </header>

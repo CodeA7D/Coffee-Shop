@@ -1,8 +1,11 @@
 import json
 import math
 
+from django.contrib import messages
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, UserCreationForm
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
@@ -167,6 +170,86 @@ def contact(request):
 
 def favorites(request):
     return render(request, "store/favorites.html")
+
+
+def user_login(request):
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip()
+        password = request.POST.get("password", "")
+        user = None
+        if email:
+            try:
+                user = authenticate(request, username=email, password=password)
+            except Exception:
+                user = None
+        if user is not None:
+            auth_login(request, user)
+            messages.success(request, "Welcome back!")
+            return redirect("home")
+        messages.error(request, "Invalid email or password.")
+
+    return render(request, "store/login.html")
+
+
+def user_signup(request):
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip()
+        password1 = request.POST.get("password1", "")
+        password2 = request.POST.get("password2", "")
+
+        if not email:
+            messages.error(request, "Email is required.")
+        elif password1 != password2:
+            messages.error(request, "Passwords do not match.")
+        else:
+            try:
+                user = authenticate(username=email, password=password1)
+            except Exception:
+                user = None
+            if user is not None:
+                messages.error(request, "An account already exists for this email.")
+            else:
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                user = User.objects.create_user(username=email.split("@", 1)[0], email=email, password=password1)
+                auth_login(request, user)
+                messages.success(request, "Account created successfully.")
+                return redirect("home")
+
+    return render(request, "store/signup.html")
+
+
+def password_reset(request):
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip()
+        new_password1 = request.POST.get("new_password1", "")
+        new_password2 = request.POST.get("new_password2", "")
+
+        if email:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                user = None
+
+            if user is not None and new_password1 and new_password2 and new_password1 == new_password2:
+                user.set_password(new_password1)
+                user.save(update_fields=["password"])
+                messages.success(request, "Password updated successfully.")
+                return redirect("login")
+            elif user is None:
+                messages.error(request, "No account found with that email.")
+            else:
+                messages.error(request, "Passwords do not match.")
+
+    return render(request, "store/password_reset.html")
+
+
+def user_logout(request):
+    auth_logout(request)
+    messages.info(request, "You have been logged out.")
+    return redirect("home")
 
 
 def profile(request):

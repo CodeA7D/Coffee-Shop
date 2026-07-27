@@ -1,4 +1,6 @@
+from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase, TestCase
+from django.urls import reverse
 
 
 class MenuAjaxFeaturesTests(SimpleTestCase):
@@ -44,3 +46,40 @@ class ProfileUpdateTests(TestCase):
         self.assertTrue(data["success"])
         self.assertEqual(self.client.session["profile_name"], "Sara Khan")
         self.assertEqual(self.client.session["profile_email"], "sara@example.com")
+
+
+class AuthenticationFlowTests(TestCase):
+    def test_login_page_uses_email_field(self):
+        response = self.client.get(reverse("login"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="email"')
+
+    def test_signup_creates_account_with_email(self):
+        response = self.client.post(
+            reverse("signup"),
+            {
+                "email": "newuser@example.com",
+                "password1": "StrongPass123!",
+                "password2": "StrongPass123!",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(get_user_model().objects.filter(email="newuser@example.com").exists())
+
+    def test_password_reset_updates_existing_user_password(self):
+        user = get_user_model().objects.create_user(username="resetuser", email="reset@example.com", password="OldPass123!")
+        response = self.client.post(
+            reverse("password_reset"),
+            {
+                "email": user.email,
+                "new_password1": "NewPass123!",
+                "new_password2": "NewPass123!",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        user.refresh_from_db()
+        self.assertTrue(user.check_password("NewPass123!"))

@@ -18,6 +18,8 @@ class EmailAuthBackend(BaseBackend):
             return None
 
         if user.check_password(password):
+            if not hasattr(user, 'backend'):
+                user.backend = f"{self.__class__.__module__}.{self.__class__.__name__}"
             return user
         return None
 

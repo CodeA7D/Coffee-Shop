@@ -9,6 +9,8 @@ class User(models.Model):
     password = models.CharField(max_length=255)
     role = models.CharField(max_length=20, default='Customer')
     created_at = models.DateTimeField(auto_now_add=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    date_joined = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         managed = False
@@ -45,8 +47,14 @@ class User(models.Model):
     def get_full_name(self):
         return self.full_name or self.email
 
+    def get_email(self):
+        return self.email
+
     def get_username(self):
         return self.email
+
+    def get_session_auth_hash(self):
+        return self.password or ''
 
     def __str__(self):
         return self.email

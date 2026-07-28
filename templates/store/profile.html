@@ -7,93 +7,89 @@ Profile | Coffy Store
 
 {% block content %}
 <main>
-    <section class="profile-banner">
-        <div class="container">
-            <h1>My Profile</h1>
-            <p>Manage your account information and view your coffee activity.</p>
-        </div>
-    </section>
+  <section class="profile-banner">
+    <div class="container">
+      <h1>My Profile</h1>
+      <p>Manage your account information and view your coffee activity.</p>
+    </div>
+  </section>
 
-    <section class="profile-page">
-        <div class="container">
-            <div class="profile-layout">
-                <div class="profile-card">
-                    <img src="{% static 'Image/pexels-mk_photoz-2149411980-32703420.jpg' %}" alt="Profile">
-                    <h2 id="profile-name-display">{{ profile.name }}</h2>
-                    <p>Coffee Lover</p>
-                    <div class="profile-stats">
-                        <div>
-                            <h3>18</h3>
-                            <span>Favorites</span>
-                        </div>
-                        <div>
-                            <h3>32</h3>
-                            <span>Orders</span>
-                        </div>
-                        <div>
-                            <h3>14</h3>
-                            <span>Reviews</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="profile-form">
-                    <h2>Edit Profile</h2>
-                    <form id="profile-form">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <label>Full Name</label>
-                            <input id="name" name="name" type="text" value="{{ profile.name }}">
-                        </div>
-                        <div class="input-group">
-                            <label>Email Address</label>
-                            <input id="email" name="email" type="email" value="{{ profile.email }}">
-                        </div>
-                        <div class="input-group">
-                            <label>Phone Number</label>
-                            <input id="phone" name="phone" type="text" value="{{ profile.phone }}">
-                        </div>
-                        <div class="input-group">
-                            <label>Address</label>
-                            <input id="address" name="address" type="text" value="{{ profile.address }}">
-                        </div>
-                        <button type="submit" class="btn-primary">Save Changes</button>
-                        <p id="profile-feedback" class="profile-feedback" aria-live="polite"></p>
-                    </form>
-                </div>
+  <section class="profile-page">
+    <div class="container">
+      <div class="profile-layout">
+        <div class="profile-card">
+          <img src="{% static 'Image/pexels-mk_photoz-2149411980-32703420.jpg' %}" alt="Profile">
+          <h2 id="profile-name-display">{{ profile.name }}</h2>
+          <p>Coffee Lover</p>
+          <div class="profile-stats">
+            <div>
+              <h3>18</h3>
+              <span>Favorites</span>
             </div>
+            <div>
+              <h3>32</h3>
+              <span>Orders</span>
+            </div>
+            <div>
+              <h3>14</h3>
+              <span>Reviews</span>
+            </div>
+          </div>
         </div>
-    </section>
+
+        <div class="profile-form">
+          <h2>Edit Profile</h2>
+          <form id="profile-form">
+            {% csrf_token %}
+            <div class="input-group">
+              <label>Full Name</label>
+              <input id="name" name="name" type="text" value="{{ profile.name }}">
+            </div>
+            <div class="input-group">
+              <label>Email Address</label>
+              <input id="email" name="email" type="email" value="{{ profile.email }}">
+            </div>
+            <div class="input-group">
+              <label>Phone Number</label>
+              <input id="phone" name="phone" type="text" value="{{ profile.phone }}">
+            </div>
+            <button type="submit" class="btn-primary">Save Changes</button>
+            <p id="profile-feedback" class="profile-feedback" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 
 <script>
-    const profileForm = document.getElementById('profile-form');
-    const feedbackBox = document.getElementById('profile-feedback');
+  const profileForm = document.getElementById('profile-form');
+  const feedbackBox = document.getElementById('profile-feedback');
 
-    profileForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const formData = new FormData(profileForm);
-        const payload = Object.fromEntries(formData.entries());
+  profileForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(profileForm);
+    const payload = Object.fromEntries(formData.entries());
 
-        const response = await fetch('{% url "update_profile" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            },
-            body: JSON.stringify(payload),
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            document.getElementById('profile-name-display').textContent = data.profile.name;
-            feedbackBox.textContent = data.message;
-            feedbackBox.style.color = '#2e7d32';
-        } else {
-            feedbackBox.textContent = data.message || 'Unable to update profile.';
-            feedbackBox.style.color = '#c62828';
-        }
+    const response = await fetch('{% url "update_profile" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+      body: JSON.stringify(payload),
     });
+
+    const data = await response.json();
+    if (data.success) {
+      document.getElementById('profile-name-display').textContent = data.profile.name;
+      feedbackBox.textContent = data.message;
+      feedbackBox.style.color = '#2e7d32';
+    } else {
+      feedbackBox.textContent = data.message || 'Unable to update profile.';
+      feedbackBox.style.color = '#c62828';
+    }
+  });
 </script>
 {% endblock %}

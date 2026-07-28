@@ -82,20 +82,14 @@ WSGI_APPLICATION = 'coffy.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DB_NAME = os.getenv('DB_NAME') or 'CoffeeShopDB'
-DB_USER = os.getenv('DB_USER') or 'root'
-DB_PASSWORD = os.getenv('DB_PASSWORD') or ''
-DB_HOST = os.getenv('DB_HOST') or '127.0.0.1'
-DB_PORT = os.getenv('DB_PORT') or '3306'
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': DB_NAME,
-        'USER': DB_USER,
-        'PASSWORD': DB_PASSWORD,
-        'HOST': DB_HOST,
-        'PORT': DB_PORT,
+        'NAME': os.getenv('DB_NAME', 'coffee_shop'),
+        'USER': os.getenv('DB_USER', 'root'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },

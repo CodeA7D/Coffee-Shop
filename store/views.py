@@ -191,7 +191,7 @@ def user_login(request):
             return render(request, "store/login.html", {"error_messages": error_messages})
         if user is not None:
             try:
-                auth_login(request, user)
+                auth_login(request, user, backend='store.backends.EmailAuthBackend')
             except Exception:
                 error_messages.append("Logged in, but unable to update session fields.")
                 return render(request, "store/login.html", {"error_messages": error_messages})
@@ -225,7 +225,7 @@ def user_signup(request):
                         role='Customer',
                     )
                     try:
-                        auth_login(request, user)
+                        auth_login(request, user, backend='store.backends.EmailAuthBackend')
                     except Exception:
                         error_messages.append("Account created but unable to complete login.")
                         return render(request, "store/signup.html", {"error_messages": error_messages})

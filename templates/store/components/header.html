@@ -23,11 +23,13 @@
             Favorites
           </a>
         </li>
+        {% if request.user.is_authenticated %}
         <li>
           <a class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'profile' %}">
             Profile
           </a>
         </li>
+        {% endif %}
         <li>
           <a class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">
             About
@@ -41,8 +43,19 @@
       </ul>
 
       <div class="nav-icons">
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'profile' %}" class="nav-auth-link">
+          {% if request.user.get_full_name %}
+          {{ request.user.get_full_name }}
+          {% else %}
+          {{ request.user.username }}
+          {% endif %}
+        </a>
+        <a href="{% url 'logout' %}" class="nav-auth-link">Logout</a>
+        {% else %}
         <a href="{% url 'login' %}" class="nav-auth-link">Login</a>
         <a href="{% url 'signup' %}" class="nav-auth-link nav-auth-link--primary">Sign Up</a>
+        {% endif %}
         <button class="icon-btn">
           <i class="fa-solid fa-magnifying-glass"></i>
         </button>

@@ -8,12 +8,6 @@
     <h1 class="auth-title">Create Your Account</h1>
     <p class="auth-subtitle">Join Coffee Shop to save favorites, track orders, and leave reviews.</p>
 
-    {% if messages %}
-    {% for message in messages %}
-    <div class="auth-alert {{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-    {% endif %}
-
     <form method="post" action="{% url 'signup' %}" novalidate>
       {% csrf_token %}
 
@@ -55,6 +49,12 @@
       </label>
 
       <button type="submit" class="auth-submit-btn">Sign Up</button>
+
+      {% if error_messages %}
+      {% for error in error_messages %}
+      <p class="auth-alert error">{{ error }}</p>
+      {% endfor %}
+      {% endif %}
     </form>
 
     <div class="auth-links">

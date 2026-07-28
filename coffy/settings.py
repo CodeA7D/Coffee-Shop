@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,7 +30,7 @@ SECRET_KEY = 'django-insecure-8ed-by1sr#w3r$#n&5m8teqn^zoad471a$r3gr6_yj@-zi^5g@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
 
 
 # Application definition
@@ -56,6 +57,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'coffy.urls'
 
+AUTHENTICATION_BACKENDS = [
+    'store.backends.EmailAuthBackend',
+]
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -77,10 +82,23 @@ WSGI_APPLICATION = 'coffy.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+DB_NAME = os.getenv('DB_NAME') or 'CoffeeShopDB'
+DB_USER = os.getenv('DB_USER') or 'root'
+DB_PASSWORD = os.getenv('DB_PASSWORD') or ''
+DB_HOST = os.getenv('DB_HOST') or '127.0.0.1'
+DB_PORT = os.getenv('DB_PORT') or '3306'
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 

@@ -4,10 +4,15 @@ import math
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, UserCreationForm
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.decorators import login_required
+from django.db import OperationalError
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
+
+from .models import User
 
 
 MENU_ITEMS = [
@@ -173,50 +178,62 @@ def favorites(request):
 
 
 def user_login(request):
+    error_messages = []
     if request.method == "POST":
         email = request.POST.get("email", "").strip()
         password = request.POST.get("password", "")
         user = None
-        if email:
-            try:
-                user = authenticate(request, username=email, password=password)
-            except Exception:
-                user = None
+        try:
+            if email and password:
+                user = authenticate(request, email=email, password=password)
+        except OperationalError:
+            error_messages.append("Unable to connect to the database. Please check your MySQL configuration.")
+            return render(request, "store/login.html", {"error_messages": error_messages})
         if user is not None:
-            auth_login(request, user)
-            messages.success(request, "Welcome back!")
+            try:
+                auth_login(request, user)
+            except Exception:
+                error_messages.append("Logged in, but unable to update session fields.")
+                return render(request, "store/login.html", {"error_messages": error_messages})
             return redirect("home")
-        messages.error(request, "Invalid email or password.")
+        error_messages.append("Invalid email or password.")
 
-    return render(request, "store/login.html")
+    return render(request, "store/login.html", {"error_messages": error_messages})
 
 
 def user_signup(request):
+    error_messages = []
     if request.method == "POST":
         email = request.POST.get("email", "").strip()
         password1 = request.POST.get("password1", "")
         password2 = request.POST.get("password2", "")
 
         if not email:
-            messages.error(request, "Email is required.")
+            error_messages.append("Email is required.")
         elif password1 != password2:
-            messages.error(request, "Passwords do not match.")
+            error_messages.append("Passwords do not match.")
         else:
             try:
-                user = authenticate(username=email, password=password1)
-            except Exception:
-                user = None
-            if user is not None:
-                messages.error(request, "An account already exists for this email.")
-            else:
-                from django.contrib.auth import get_user_model
-                User = get_user_model()
-                user = User.objects.create_user(username=email.split("@", 1)[0], email=email, password=password1)
-                auth_login(request, user)
-                messages.success(request, "Account created successfully.")
-                return redirect("home")
+                if User.objects.filter(email=email).exists():
+                    error_messages.append("An account already exists for this email.")
+                else:
+                    full_name = email.split("@", 1)[0].replace(".", " ").replace("_", " ").title()
+                    user = User.objects.create(
+                        full_name=full_name,
+                        email=email,
+                        password=make_password(password1),
+                        role='Customer',
+                    )
+                    try:
+                        auth_login(request, user)
+                    except Exception:
+                        error_messages.append("Account created but unable to complete login.")
+                        return render(request, "store/signup.html", {"error_messages": error_messages})
+                    return redirect("home")
+            except OperationalError:
+                error_messages.append("Unable to connect to the database. Please check your MySQL configuration.")
 
-    return render(request, "store/signup.html")
+    return render(request, "store/signup.html", {"error_messages": error_messages})
 
 
 def password_reset(request):
@@ -226,8 +243,6 @@ def password_reset(request):
         new_password2 = request.POST.get("new_password2", "")
 
         if email:
-            from django.contrib.auth import get_user_model
-            User = get_user_model()
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
@@ -252,10 +267,21 @@ def user_logout(request):
     return redirect("home")
 
 
+@login_required
 def profile(request):
+    user = request.user
+    # Prefer the user's full name if available, otherwise fall back to email
+    try:
+        if hasattr(user, "get_full_name"):
+            name = user.get_full_name() or getattr(user, "email", "")
+        else:
+            name = getattr(user, "full_name", getattr(user, "email", ""))
+    except Exception:
+        name = getattr(user, "email", "")
+
     profile_data = {
-        "name": request.session.get("profile_name", "Ahmed Musa"),
-        "email": request.session.get("profile_email", "ahmed@example.com"),
+        "name": name,
+        "email": getattr(user, "email", ""),
         "phone": request.session.get("profile_phone", "+966 5X XXX XXXX"),
         "address": request.session.get("profile_address", "Dammam, Saudi Arabia"),
     }
@@ -263,6 +289,7 @@ def profile(request):
 
 
 @csrf_exempt
+@login_required
 def update_profile(request):
     if request.method != "POST":
         return JsonResponse({"success": False, "message": "Only POST requests are allowed."}, status=405)

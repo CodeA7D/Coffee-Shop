@@ -19,9 +19,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
 
-print("ENV FILE EXISTS:", (BASE_DIR / ".env").exists())
-print("ENV PATH:", BASE_DIR / ".env")
-print("PASSWORD:", repr(os.getenv("DB_PASSWORD")))
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",

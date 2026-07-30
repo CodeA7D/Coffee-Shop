@@ -11,72 +11,34 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
+from django.core.paginator import Paginator
 
 from .models import User
+from .models import Menu_item
 
-
-MENU_ITEMS = [
-    {"title": "Espresso", "category": "Hot Coffee", "description": "Strong and bold espresso with a silky finish.", "price": "4.20", "rating": "4.9", "badge": "Best Seller", "favorites": 180},
-    {"title": "Cappuccino", "category": "Hot Coffee", "description": "Velvety espresso topped with creamy foam.", "price": "5.10", "rating": "4.8", "badge": "Popular", "favorites": 160},
-    {"title": "Americano", "category": "Hot Coffee", "description": "Smooth black coffee with a mellow body.", "price": "4.50", "rating": "4.7", "badge": "New", "favorites": 140},
-    {"title": "Vanilla Latte", "category": "Hot Coffee", "description": "Creamy latte finished with sweet vanilla notes.", "price": "5.80", "rating": "4.9", "badge": "Customer Favorite", "favorites": 220},
-    {"title": "Mocha", "category": "Hot Coffee", "description": "Rich espresso blended with premium chocolate.", "price": "6.20", "rating": "4.8", "badge": "Chef Pick", "favorites": 170},
-    {"title": "Iced Latte", "category": "Cold Drinks", "description": "Refreshing chilled latte served over ice.", "price": "5.40", "rating": "4.9", "badge": "Fresh", "favorites": 210},
-    {"title": "Caramel Cold Brew", "category": "Cold Drinks", "description": "Slow-brewed coffee with a buttery caramel twist.", "price": "5.90", "rating": "4.8", "badge": "Best Seller", "favorites": 205},
-    {"title": "Matcha Frappe", "category": "Cold Drinks", "description": "Creamy matcha refreshment with a sweet finish.", "price": "6.10", "rating": "4.7", "badge": "Seasonal", "favorites": 195},
-    {"title": "Mango Smoothie", "category": "Cold Drinks", "description": "Bright tropical mango blended to perfection.", "price": "5.70", "rating": "4.6", "badge": "Fresh", "favorites": 190},
-    {"title": "Mint Lemon Cooler", "category": "Cold Drinks", "description": "Crisp citrus sparkle with a cooling mint finish.", "price": "4.90", "rating": "4.5", "badge": "New", "favorites": 185},
-    {"title": "Chicken Croissant", "category": "Snacks", "description": "Golden croissant filled with seasoned chicken.", "price": "7.40", "rating": "4.6", "badge": "Lunch Pick", "favorites": 175},
-    {"title": "Cheese Toastie", "category": "Snacks", "description": "Toasted sandwich packed with melted cheese.", "price": "6.80", "rating": "4.7", "badge": "Popular", "favorites": 172},
-    {"title": "Avocado Sandwich", "category": "Snacks", "description": "Creamy avocado layered on soft artisan bread.", "price": "7.20", "rating": "4.8", "badge": "Healthy", "favorites": 165},
-    {"title": "Garlic Bread", "category": "Snacks", "description": "Crisp baguette with roasted garlic and herbs.", "price": "4.30", "rating": "4.5", "badge": "Quick Bite", "favorites": 158},
-    {"title": "Honey Butter Pancake", "category": "Snacks", "description": "Fluffy pancake brushed with sweet honey butter.", "price": "5.20", "rating": "4.6", "badge": "Morning Favorite", "favorites": 155},
-    {"title": "Brownie Bites", "category": "Desserts", "description": "Soft fudgy brownies with a rich chocolate center.", "price": "4.80", "rating": "4.9", "badge": "Sweet Treat", "favorites": 152},
-    {"title": "Cheesecake Slice", "category": "Desserts", "description": "Creamy cheesecake with a buttery biscuit base.", "price": "5.60", "rating": "4.8", "badge": "Best Seller", "favorites": 151},
-    {"title": "Tiramisu Cup", "category": "Desserts", "description": "Layered coffee sponge dessert with cocoa dusting.", "price": "5.30", "rating": "4.7", "badge": "Chef Pick", "favorites": 146},
-    {"title": "Cinnamon Roll", "category": "Desserts", "description": "Soft swirls topped with silky glaze.", "price": "4.90", "rating": "4.6", "badge": "Fresh", "favorites": 142},
-    {"title": "Chocolate Lava Cake", "category": "Desserts", "description": "Warm cake with a molten chocolate core.", "price": "6.50", "rating": "4.9", "badge": "Customer Favorite", "favorites": 141},
-    {"title": "Chai Tea", "category": "Hot Drinks", "description": "A fragrant spiced tea with a soothing finish.", "price": "3.90", "rating": "4.5", "badge": "Cozy", "favorites": 138},
-    {"title": "Hot Chocolate", "category": "Hot Drinks", "description": "Decadent cocoa blended with whipped cream.", "price": "4.70", "rating": "4.7", "badge": "Warm", "favorites": 135},
-    {"title": "Chicken Puff", "category": "Snacks", "description": "Flaky pastry filled with savory chicken.", "price": "4.60", "rating": "4.4", "badge": "New", "favorites": 132},
-    {"title": "Berry Tart", "category": "Desserts", "description": "Buttery tart filled with fresh berries.", "price": "5.10", "rating": "4.5", "badge": "Seasonal", "favorites": 130},
-    {"title": "Dulce de Leche Cookie", "category": "Desserts", "description": "Soft cookie kissed with caramel sweetness.", "price": "3.80", "rating": "4.6", "badge": "Snackable", "favorites": 128},
-]
-
-
-def _get_menu_dataset():
-    menu_items = []
-    for item in MENU_ITEMS:
-        menu_item = dict(item)
-        menu_item.setdefault("reviews", 120)
-        menu_item.setdefault("discount", "No discount")
-        menu_items.append(menu_item)
-    return menu_items
 
 
 def _filter_menu_items(request):
-    menu_items = _get_menu_dataset()
-    query = request.GET.get("q", "").strip().lower()
-    category = request.GET.get("category", "").strip()
-    sort_by = request.GET.get("sort", "").strip().lower()
+    menu_items = Menu_item.objects.select_related("category").all()
+
+    query = request.GET.get("q", "").strip()
 
     if query:
-        query_terms = query.split()
-        menu_items = [
-            item
-            for item in menu_items
-            if all(term in " ".join([item["title"], item["description"], item["category"]]).lower() for term in query_terms)
-        ]
+        menu_items = menu_items.filter(
+            Q(product_name__icontains=query) |
+            Q(description__icontains=query)
+        )
 
-    if category and category != "All Categories":
-        menu_items = [item for item in menu_items if item["category"] == category]
+    category = request.GET.get("category")
 
-    if sort_by == "price":
-        menu_items = sorted(menu_items, key=lambda item: float(item["price"]))
-    elif sort_by == "rating":
-        menu_items = sorted(menu_items, key=lambda item: float(item["rating"]), reverse=True)
-    elif sort_by == "favorites":
-        menu_items = sorted(menu_items, key=lambda item: item.get("favorites", 0), reverse=True)
+    if category:
+        menu_items = menu_items.filter(category__category_name=category)
+
+    sort = request.GET.get("sort")
+
+    if sort == "price":
+        menu_items = menu_items.order_by("original_price")
 
     return menu_items
 
@@ -88,73 +50,57 @@ def home(request):
 def menu(request):
     menu_items = _filter_menu_items(request)
 
+    paginator = Paginator(menu_items, 8)
+
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "menu_items": page_obj.object_list,
+        "page": page_obj.number,
+        "total_pages": paginator.num_pages,
+        "page_numbers": paginator.page_range,
+    }
+
     if request.GET.get("ajax") == "1":
-        items_per_page = 8
-        total_pages = max(1, math.ceil(len(menu_items) / items_per_page))
+        items_html = render_to_string(
+            "store/components/menu_items.html",
+            context,
+            request=request,
+        )
 
-        page = request.GET.get("page", 1)
-        try:
-            page = int(page)
-        except (TypeError, ValueError):
-            page = 1
-
-        page = max(1, min(page, total_pages))
-        start = (page - 1) * items_per_page
-        end = start + items_per_page
-        page_items = menu_items[start:end]
-
-        html = render_to_string("store/components/menu_items.html", {"menu_items": page_items})
         pagination_html = render_to_string(
             "store/components/pagination.html",
-            {
-                "page": page,
-                "total_pages": total_pages,
-                "page_numbers": range(1, total_pages + 1),
-            },
-        )
-        return JsonResponse(
-            {
-                "success": True,
-                "items_html": html,
-                "pagination_html": pagination_html,
-                "page": page,
-                "total_pages": total_pages,
-            }
+            context,
+            request=request,
         )
 
-    items_per_page = 8
-    total_pages = max(1, math.ceil(len(menu_items) / items_per_page))
+        return JsonResponse({
+            "success": True,
+            "items_html": items_html,
+            "pagination_html": pagination_html,
+            "page": page_obj.number,
+            "total_pages": paginator.num_pages,
+        })
 
-    page = request.GET.get("page", 1)
-    try:
-        page = int(page)
-    except (TypeError, ValueError):
-        page = 1
-
-    page = max(1, min(page, total_pages))
-    start = (page - 1) * items_per_page
-    end = start + items_per_page
-    page_items = menu_items[start:end]
-
-    return render(
-        request,
-        "store/menu.html",
-        {
-            "menu_items": page_items,
-            "page": page,
-            "total_pages": total_pages,
-            "page_numbers": range(1, total_pages + 1),
-        },
-    )
+    return render(request, "store/menu.html", context)
 
 
 def search_suggestions(request):
     menu_items = _filter_menu_items(request)
+
     suggestions = [
-        {"title": item["title"], "category": item["category"]}
+        {
+            "title": item.product_name,
+            "category": item.category.category_name,
+        }
         for item in menu_items[:6]
     ]
-    return JsonResponse({"success": True, "suggestions": suggestions})
+
+    return JsonResponse({
+        "success": True,
+        "suggestions": suggestions
+    })
 
 
 def popular(request):

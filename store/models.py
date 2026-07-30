@@ -58,3 +58,31 @@ class User(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class Menu_item(models.Model):
+    product_id = models.AutoField(primary_key=True)
+    category = models.ForeignKey('Categories', models.DO_NOTHING)
+    product_name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    ingredients = models.TextField(blank=True, null=True)
+    original_price = models.DecimalField(max_digits=8, decimal_places=2)
+    discount_price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+    stock_quantity = models.IntegerField()
+    is_available = models.IntegerField()
+    created_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'products'
+
+
+class Categories(models.Model):
+    category_id = models.AutoField(primary_key=True)
+    category_name = models.CharField(unique=True, max_length=50)
+
+    class Meta:
+        managed = False
+        db_table = 'categories'
+
+

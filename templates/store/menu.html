@@ -24,11 +24,10 @@ Menu | Coffy Store
           <div id="search-suggestions" class="search-suggestions"></div>
         </div>
         <select id="category-filter">
-          <option value="All Categories">All Categories</option>
-          <option value="Hot Coffee">Hot Coffee</option>
-          <option value="Cold Drinks">Cold Drinks</option>
-          <option value="Snacks">Snacks</option>
-          <option value="Desserts">Desserts</option>
+          <option value="">All Categories</option>
+          {% for category in categories %}
+          <option value="{{ category.category_name }}">{{ category.category_name }}</option>
+          {% endfor %}
         </select>
         <select id="sort-filter">
           <option value="">Sort By</option>
@@ -38,6 +37,7 @@ Menu | Coffy Store
         </select>
       </div>
     </div>
+
   </section>
 
   <section class="menu-products">

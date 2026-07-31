@@ -60,9 +60,25 @@ class User(models.Model):
         return self.email
 
 
+
+
+class Category(models.Model):
+    category_id = models.AutoField(primary_key=True)
+    category_name = models.CharField(unique=True, max_length=50)
+
+    class Meta:
+        managed = False
+        db_table = 'categories'
+
+
 class Menu_item(models.Model):
     product_id = models.AutoField(primary_key=True)
-    category = models.ForeignKey('Categories', models.DO_NOTHING)
+    category = models.ForeignKey(
+    Category,
+    models.DO_NOTHING,
+    db_column="category_id",
+    related_name="products",
+)
     product_name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     ingredients = models.TextField(blank=True, null=True)
@@ -76,13 +92,64 @@ class Menu_item(models.Model):
         managed = False
         db_table = 'products'
 
+class Review(models.Model):
+    review_id = models.AutoField(primary_key=True)
 
-class Categories(models.Model):
-    category_id = models.AutoField(primary_key=True)
-    category_name = models.CharField(unique=True, max_length=50)
+    user = models.ForeignKey(
+        User,
+        db_column="user_id",
+        on_delete=models.CASCADE,
+        related_name="reviews",
+    )
+
+    product = models.ForeignKey(
+        Menu_item,
+        db_column="product_id",
+        on_delete=models.CASCADE,
+        related_name="reviews",
+    )
+
+    rating = models.IntegerField()
+
+    review_text = models.TextField(
+        blank=True,
+        null=True,
+    )
+
+    created_at = models.DateTimeField()
+
+    updated_at = models.DateTimeField()
 
     class Meta:
         managed = False
-        db_table = 'categories'
+        db_table = "reviews"
+        app_label = "store"
 
+    def __str__(self):
+        return f"{self.user.full_name} - {self.product.product_name}"
+
+
+class Favorite(models.Model):
+    favorite_id = models.AutoField(primary_key=True)
+
+    user = models.ForeignKey(
+        User,
+        db_column="user_id",
+        on_delete=models.CASCADE,
+        related_name="favorites",
+    )
+
+    product = models.ForeignKey(
+        Menu_item,
+        db_column="product_id",
+        on_delete=models.CASCADE,
+        related_name="favorites",
+    )
+
+    created_at = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = "favorites"
+        app_label = "store"
 

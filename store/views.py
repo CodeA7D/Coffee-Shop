@@ -11,16 +11,24 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q
+from django.db.models import Q, Avg, Count
 from django.core.paginator import Paginator
 
-from .models import User
-from .models import Menu_item
+from .models import User, Menu_item, Category, Review, Favorite
 
 
+
+from django.db.models import Q, Avg, Count
 
 def _filter_menu_items(request):
-    menu_items = Menu_item.objects.select_related("category").all()
+    menu_items = (
+        Menu_item.objects
+        .select_related("category")
+        .annotate(
+            average_rating=Avg("reviews__rating"),
+            total_reviews=Count("reviews"),
+        )
+    )
 
     query = request.GET.get("q", "").strip()
 
@@ -33,12 +41,18 @@ def _filter_menu_items(request):
     category = request.GET.get("category")
 
     if category:
-        menu_items = menu_items.filter(category__category_name=category)
+        menu_items = menu_items.filter(
+            category__category_name=category
+        )
 
     sort = request.GET.get("sort")
 
     if sort == "price":
         menu_items = menu_items.order_by("original_price")
+
+    elif sort == "rating":
+        menu_items = menu_items.order_by("-average_rating")
+
 
     return menu_items
 
@@ -55,11 +69,14 @@ def menu(request):
     page_number = request.GET.get("page", 1)
     page_obj = paginator.get_page(page_number)
 
+    categories = Category.objects.all().order_by("category_name")
+
     context = {
-        "menu_items": page_obj.object_list,
-        "page": page_obj.number,
-        "total_pages": paginator.num_pages,
-        "page_numbers": paginator.page_range,
+    "menu_items": page_obj.object_list,
+    "categories": categories,
+    "page": page_obj.number,
+    "total_pages": paginator.num_pages,
+    "page_numbers": paginator.page_range,
     }
 
     if request.GET.get("ajax") == "1":
@@ -83,6 +100,7 @@ def menu(request):
             "total_pages": paginator.num_pages,
         })
 
+
     return render(request, "store/menu.html", context)
 
 
@@ -103,12 +121,43 @@ def search_suggestions(request):
     })
 
 
+def _get_product_reviews(product_id):
+    return (
+        Review.objects
+        .filter(product_id=product_id)
+        .select_related("user")
+        .order_by("-created_at")
+    )
+
+
 def popular(request):
     return render(request, "store/home.html")
 
 
-def product_details(request):
-    return render(request, "store/product-details.html")
+def product_details(request, product_id):
+
+    product = (
+    Menu_item.objects
+    .select_related("category")
+    .annotate(
+        average_rating=Avg("reviews__rating"),
+        total_reviews=Count("reviews"),
+    )
+    .get(product_id=product_id)
+)
+
+    reviews = _get_product_reviews(product_id)
+
+    context = {
+        "product": product,
+        "reviews": reviews,
+    }
+
+    return render(
+        request,
+        "store/product-details.html",
+        context,
+    )
 
 
 def about(request):
@@ -119,8 +168,26 @@ def contact(request):
     return render(request, "store/contact.html")
 
 
+@login_required
 def favorites(request):
-    return render(request, "store/favorites.html")
+
+    favorites = (
+        Favorite.objects
+        .filter(user=request.user)
+        .select_related(
+            "product",
+            "product__category",
+        )
+        .prefetch_related("product__reviews")
+    )
+
+    return render(
+        request,
+        "store/favorites.html",
+        {
+            "favorites": favorites,
+        },
+    )
 
 
 def user_login(request):

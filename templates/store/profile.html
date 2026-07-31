@@ -22,17 +22,14 @@ Profile | Coffy Store
           <h2 id="profile-name-display">{{ profile.name }}</h2>
           <p>Coffee Lover</p>
           <div class="profile-stats">
-            <div>
-              <h3>18</h3>
-              <span>Favorites</span>
+            <div class="stat">
+              <h3>{{ profile.favorites_count }}</h3>
+              <p>Favorites</p>
             </div>
-            <div>
-              <h3>32</h3>
-              <span>Orders</span>
-            </div>
-            <div>
-              <h3>14</h3>
-              <span>Reviews</span>
+
+            <div class="stat">
+              <h3>{{ profile.reviews_count }}</h3>
+              <p>Reviews</p>
             </div>
           </div>
         </div>
@@ -48,10 +45,6 @@ Profile | Coffy Store
             <div class="input-group">
               <label>Email Address</label>
               <input id="email" name="email" type="email" value="{{ profile.email }}">
-            </div>
-            <div class="input-group">
-              <label>Phone Number</label>
-              <input id="phone" name="phone" type="text" value="{{ profile.phone }}">
             </div>
             <button type="submit" class="btn-primary">Save Changes</button>
             <p id="profile-feedback" class="profile-feedback" aria-live="polite"></p>

@@ -42,6 +42,7 @@ Menu | Coffy Store
 
   <section class="menu-products">
     <div class="container">
+      {% csrf_token %}
       <div id="items-list" class="items-list">
         {% include 'store/components/menu_items.html' %}
       </div>
@@ -60,6 +61,63 @@ Menu | Coffy Store
   const pagination = document.getElementById('menu-pagination');
   const menuUrl = '{% url "menu" %}';
   const suggestionsUrl = '{% url "search_suggestions" %}';
+  const loginUrl = '{% url "login" %}';
+  const isAuthenticated = "{{ request.user.is_authenticated|yesno:'true,false' }}" === "true";
+
+
+  function toggleFavoriteUrl(product_id) {
+    return `/favorites/toggle/${product_id}/`;
+  }
+
+  async function handleFavoriteClick(button) {
+    console.log("Favorite clicked");
+
+    if (!isAuthenticated) {
+      window.location.href = loginUrl;
+      return;
+    }
+
+    if (button.dataset.loading === 'true') {
+      return; // ignore rapid repeat clicks while a request is in flight
+    }
+    button.dataset.loading = 'true';
+    button.disabled = true;
+
+    const productId = button.dataset.productId;
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    try {
+      const response = await fetch(toggleFavoriteUrl(productId), {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': csrfToken,
+        },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        button.classList.toggle('active', data.favorite);
+
+        const countEl = button.closest('.menu-item')?.querySelector('[data-favorites-count]');
+        if (countEl) {
+          const current = parseInt(countEl.textContent.trim(), 10) || 0;
+          countEl.innerHTML = `<i class="fa-solid fa-heart"></i> ${current + (data.favorite ? 1 : -1)}`;
+        }
+      }
+    } finally {
+      button.dataset.loading = 'false';
+      button.disabled = false;
+    }
+  }
+
+  function attachFavoriteHandlers() {
+    itemsList.querySelectorAll('.favorite-btn').forEach(button => {
+      button.addEventListener('click', () => handleFavoriteClick(button));
+    });
+  }
+
+  attachFavoriteHandlers();
 
   function buildUrl(page = null) {
     const query = searchInput.value.trim();
@@ -88,6 +146,7 @@ Menu | Coffy Store
     const data = await response.json();
     if (data.success) {
       itemsList.innerHTML = data.items_html;
+      attachFavoriteHandlers();
       if (pagination) {
         pagination.innerHTML = data.pagination_html || pagination.innerHTML;
         pagination.dataset.page = data.page || 1;

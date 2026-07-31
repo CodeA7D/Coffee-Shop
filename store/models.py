@@ -116,9 +116,9 @@ class Review(models.Model):
         null=True,
     )
 
-    created_at = models.DateTimeField()
+    created_at = models.DateTimeField(blank=True, null=True)
 
-    updated_at = models.DateTimeField()
+    updated_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -146,7 +146,7 @@ class Favorite(models.Model):
         related_name="favorites",
     )
 
-    created_at = models.DateTimeField()
+    created_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False

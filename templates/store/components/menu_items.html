@@ -9,6 +9,10 @@
         {{ item.average_rating|default:"0.0"|floatformat:1 }}
       </span>
       <span class="reviews">{{ item.total_reviews }} review{{ item.total_reviews|pluralize }}</span>
+      <span class="favorites-count" data-favorites-count>
+        <i class="fa-solid fa-heart"></i>
+        {{ item.total_favorites }}
+      </span>
       <span class="category">{{ item.category.category_name }}</span>
     </div>
   </div>
@@ -23,6 +27,10 @@
       <strong>${{ item.original_price }}</strong>
       {% endif %}
     </div>
+    <button class="favorite-btn {% if item.is_favorite %}active{% endif %}" data-product-id="{{ item.product_id }}"
+      aria-label="Toggle favorite" title="Toggle favorite">
+      <i class="fa-solid fa-heart"></i>
+    </button>
   </div>
 </article>
 {% empty %}

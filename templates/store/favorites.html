@@ -20,7 +20,9 @@ Favorites | Coffy Store
       <div class="products-grid">
         {% for favorite in favorites %}
         <article class="product-card">
-          <button class="favorite" data-product-id="{{ favorite.product.product_id }}">
+          {% csrf_token %}
+          <button class="favorite active" data-product-id="{{ favorite.product.product_id }}"
+            aria-label="Toggle favorite" title="Remove from favorites">
             <i class="fa-solid fa-heart"></i>
           </button>
           <h3>{{ favorite.product.product_name }}</h3>
@@ -57,4 +59,36 @@ Favorites | Coffy Store
   </section>
   {% endif %}
 </main>
+
+<script>
+  const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+  document.querySelectorAll(".favorite").forEach(button => {
+
+    button.addEventListener("click", async () => {
+
+      const productId = button.dataset.productId;
+
+      const response = await fetch(`/favorites/toggle/${productId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success && !data.favorite) {
+        button.closest(".product-card").remove();
+
+        // Show empty state if no favorites remain
+        if (!document.querySelector(".product-card")) {
+          location.reload();
+        }
+      }
+    });
+
+  });
+</script>
 {% endblock %}

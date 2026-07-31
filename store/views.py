@@ -11,14 +11,12 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q, Avg, Count
+from django.views.decorators.http import require_POST
+from django.db.models import Q, Avg, Count, Prefetch
 from django.core.paginator import Paginator
-
 from .models import User, Menu_item, Category, Review, Favorite
 
 
-
-from django.db.models import Q, Avg, Count
 
 def _filter_menu_items(request):
     menu_items = (
@@ -27,6 +25,7 @@ def _filter_menu_items(request):
         .annotate(
             average_rating=Avg("reviews__rating"),
             total_reviews=Count("reviews"),
+            total_favorites=Count("favorites", distinct=True),
         )
     )
 
@@ -45,6 +44,21 @@ def _filter_menu_items(request):
             category__category_name=category
         )
 
+    if request.user.is_authenticated:
+
+        favorite_ids = set(
+            Favorite.objects.filter(user=request.user)
+            .values_list("product_id", flat=True)
+        )
+
+        for item in menu_items:
+            item.is_favorite = item.product_id in favorite_ids
+
+    else:
+
+        for item in menu_items:
+            item.is_favorite = False
+
     sort = request.GET.get("sort")
 
     if sort == "price":
@@ -53,6 +67,8 @@ def _filter_menu_items(request):
     elif sort == "rating":
         menu_items = menu_items.order_by("-average_rating")
 
+    elif sort == "favorites":
+        menu_items = menu_items.order_by("-total_favorites")
 
     return menu_items
 
@@ -144,7 +160,7 @@ def product_details(request, product_id):
         total_reviews=Count("reviews"),
     )
     .get(product_id=product_id)
-)
+    )
 
     reviews = _get_product_reviews(product_id)
 
@@ -171,14 +187,19 @@ def contact(request):
 @login_required
 def favorites(request):
 
+    products = (
+        Menu_item.objects
+        .select_related("category")
+        .annotate(
+            average_rating=Avg("reviews__rating"),
+        )
+    )
     favorites = (
         Favorite.objects
         .filter(user=request.user)
-        .select_related(
-            "product",
-            "product__category",
+        .prefetch_related(
+            Prefetch("product", queryset=products)
         )
-        .prefetch_related("product__reviews")
     )
 
     return render(
@@ -188,6 +209,31 @@ def favorites(request):
             "favorites": favorites,
         },
     )
+
+
+@require_POST
+@login_required
+def toggle_favorite(request, product_id):
+
+    product = Menu_item.objects.get(product_id=product_id)
+
+    favorite, created = Favorite.objects.get_or_create(
+        user=request.user,
+        product=product,
+    )
+
+    if created:
+        return JsonResponse({
+            "success": True,
+            "favorite": True,
+        })
+
+    favorite.delete()
+
+    return JsonResponse({
+        "success": True,
+        "favorite": False,
+    })
 
 
 def user_login(request):
@@ -295,35 +341,49 @@ def profile(request):
     profile_data = {
         "name": name,
         "email": getattr(user, "email", ""),
-        "phone": request.session.get("profile_phone", "+966 5X XXX XXXX"),
-        "address": request.session.get("profile_address", "Dammam, Saudi Arabia"),
+        "reviews_count": Review.objects.filter(user=user).count(),
+        "favorites_count": Favorite.objects.filter(user=user).count(),
     }
     return render(request, "store/profile.html", {"profile": profile_data})
 
 
-@csrf_exempt
 @login_required
 def update_profile(request):
     if request.method != "POST":
-        return JsonResponse({"success": False, "message": "Only POST requests are allowed."}, status=405)
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Only POST requests are allowed."
+            },
+            status=405
+        )
 
     try:
-        payload = json.loads(request.body.decode("utf-8")) if request.body else {}
+        payload = json.loads(request.body) if request.body else {}
     except json.JSONDecodeError:
         payload = request.POST
 
-    if not payload:
-        payload = request.POST
+    name = payload.get("name") or payload.get("full_name")
+    email = payload.get("email")
 
-    name = payload.get("name") or payload.get("full_name") or "Ahmed Musa"
-    email = payload.get("email") or "ahmed@example.com"
-    phone = payload.get("phone") or "+966 5X XXX XXXX"
-    address = payload.get("address") or "Dammam, Saudi Arabia"
+    user = request.user
 
-    request.session["profile_name"] = name
-    request.session["profile_email"] = email
-    request.session["profile_phone"] = phone
-    request.session["profile_address"] = address
-    request.session.modified = True
+    # Optional validation
+    if User.objects.exclude(pk=user.pk).filter(email=email).exists():
+        return JsonResponse({
+            "success": False,
+            "message": "Email is already in use."
+        })
 
-    return JsonResponse({"success": True, "message": "Profile updated successfully.", "profile": {"name": name, "email": email, "phone": phone, "address": address}})
+    user.full_name = name
+    user.email = email
+    user.save(update_fields=["full_name", "email"])
+
+    return JsonResponse({
+        "success": True,
+        "message": "Profile updated successfully.",
+        "profile": {
+            "name": user.full_name,
+            "email": user.email,
+        }
+    })
